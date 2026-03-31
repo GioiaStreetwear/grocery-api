@@ -1,0 +1,306 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Grocery Deal Hunter API",
+    "description": "API endpoint for the Grocery Deal Hunter workflow. Accepts a grocery list and returns optimized shopping results.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/run-grocery-optimizer": {
+      "post": {
+        "summary": "Run Grocery Optimizer",
+        "description": "Run the Grocery Deal Hunter optimization workflow.\n\nAccepts a grocery list and returns optimized shopping results\nwith price comparisons, store assignments, and savings analysis.",
+        "operationId": "run_grocery_optimizer_run_grocery_optimizer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroceryOptimizerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroceryOptimizerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GroceryOptimizerRequest": {
+        "properties": {
+          "list_name": {
+            "type": "string",
+            "title": "List Name",
+            "description": "Name for this shopping list",
+            "default": "My Grocery List"
+          },
+          "grocery_list_text": {
+            "type": "string",
+            "title": "Grocery List Text",
+            "description": "Grocery items, one per line"
+          },
+          "location": {
+            "type": "string",
+            "title": "Location",
+            "description": "City or region for localized searches",
+            "default": "Amsterdam, Netherlands"
+          },
+          "radius_km": {
+            "type": "number",
+            "maximum": 50.0,
+            "minimum": 0.5,
+            "title": "Radius Km",
+            "description": "Max search radius in km",
+            "default": 5.0
+          },
+          "shopping_mode": {
+            "type": "string",
+            "title": "Shopping Mode",
+            "description": "one_time | weekly",
+            "default": "one_time"
+          },
+          "optimization_strategy": {
+            "type": "string",
+            "title": "Optimization Strategy",
+            "description": "single_store | multi_store | balanced",
+            "default": "balanced"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grocery_list_text"
+        ],
+        "title": "GroceryOptimizerRequest"
+      },
+      "GroceryOptimizerResponse": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/SummaryResult"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemResult"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "stores": {
+            "items": {
+              "$ref": "#/components/schemas/StoreResult"
+            },
+            "type": "array",
+            "title": "Stores"
+          },
+          "pdf_url": {
+            "type": "string",
+            "title": "Pdf Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "items",
+          "stores",
+          "pdf_url"
+        ],
+        "title": "GroceryOptimizerResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ItemResult": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "store": {
+            "type": "string",
+            "title": "Store"
+          },
+          "old_price": {
+            "type": "number",
+            "title": "Old Price"
+          },
+          "new_price": {
+            "type": "number",
+            "title": "New Price"
+          },
+          "discount_label": {
+            "type": "string",
+            "title": "Discount Label"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "store",
+          "old_price",
+          "new_price",
+          "discount_label",
+          "image_url"
+        ],
+        "title": "ItemResult"
+      },
+      "StoreResult": {
+        "properties": {
+          "store_name": {
+            "type": "string",
+            "title": "Store Name"
+          },
+          "total": {
+            "type": "number",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "store_name",
+          "total"
+        ],
+        "title": "StoreResult"
+      },
+      "SummaryResult": {
+        "properties": {
+          "total_cost": {
+            "type": "number",
+            "title": "Total Cost"
+          },
+          "savings": {
+            "type": "number",
+            "title": "Savings"
+          },
+          "savings_percent": {
+            "type": "number",
+            "title": "Savings Percent"
+          },
+          "recommended_strategy": {
+            "type": "string",
+            "title": "Recommended Strategy"
+          },
+          "route_text": {
+            "type": "string",
+            "title": "Route Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_cost",
+          "savings",
+          "savings_percent",
+          "recommended_strategy",
+          "route_text"
+        ],
+        "title": "SummaryResult"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
